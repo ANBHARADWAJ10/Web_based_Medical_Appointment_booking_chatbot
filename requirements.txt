@@ -1,0 +1,9 @@
+python-telegram-bot==20.7
+pymongo==4.6.1
+python-dotenv==1.0.0
+nltk==3.8.1
+reportlab==4.0.7
+flask==2.3.3
+Flask-CORS==4.0.0
+
+# .venv\Scripts\Activate.ps1 -- To activate the virtual environment in PowerShell
