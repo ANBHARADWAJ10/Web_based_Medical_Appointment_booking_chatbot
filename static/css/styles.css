@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    /* background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); */
     min-height: 100vh;
     padding: 20px;
 }
@@ -17,7 +17,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
-    color: white;
+    color: black;
     text-align: center;
 }
 
@@ -593,17 +593,22 @@ body {
    ============================================ */
 
 /* Light Theme Styles */
-body.light-theme {
+/* body.light-theme {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
+} */
+
+/* .chat-window.light-theme {
+    background: rgba(207, 191, 191, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+} */
 
 .chat-window.light-theme {
-    background: rgba(255, 255, 255, 0.95);
+    background: #F2F0EF;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .light-theme .chat-header {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(247, 243, 243);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -658,7 +663,7 @@ body.light-theme {
     background: rgba(0, 0, 0, 0.2);
 }
 
-/* Light theme button adjustments */
+
 .light-theme .chat-option-btn {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
@@ -667,14 +672,17 @@ body.light-theme {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
+
+
+
 .light-theme .date-btn {
     color: #212529;
 }
 
 /* Dark Theme Styles (Default) */
-body.dark-theme {
+/* body.dark-theme {
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-}
+} */
 
 .chat-window.dark-theme {
     background: rgba(30, 30, 50, 0.98);
