@@ -9,6 +9,8 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from dotenv import load_dotenv
 
+# contact
+import re
 # Load environment variables
 load_dotenv()
 
@@ -844,13 +846,43 @@ def handle_gender_input(message, session):
         'placeholder': 'Enter your contact number'
     }
 
+# def handle_contact_input(message, session):
+#     """Handle contact input"""
+#     contact = message.strip()
+#     session['patient_data']['contact'] = contact
+#     session['patient_data']['symptoms'] = []
+#     session['state'] = 'waiting_symptoms'
+    
+#     return {
+#         'message': f'📞 Contact: {contact}\n\n🩺 Please describe your symptoms (e.g., fever, headache, blocked nose, cough):\n\nYou can type multiple symptoms separated by commas.',
+#         'type': 'text_input',
+#         'placeholder': 'Describe your symptoms'
+#     }
+
 def handle_contact_input(message, session):
-    """Handle contact input"""
+    """Handle contact input with Indian mobile number validation"""
     contact = message.strip()
+
+    # Indian mobile number regex:
+    # Optional +91 / 91 / 0 prefix and 10 digits starting with 6–9
+    pattern = r'^(?:\+91|91|0)?[6-9]\d{9}$'
+
+    # Validate number
+    if not re.match(pattern, contact):
+        return {
+            'message': '❌ Invalid mobile number.\n\nPlease enter a valid Indian mobile number (e.g., 9876543210 or +919876543210):',
+            'type': 'text_input',
+            'placeholder': 'Enter your contact number'
+        }
+
+    # Normalize to last 10 digits
+    contact = contact[-10:]
+
+    # Save valid contact and continue
     session['patient_data']['contact'] = contact
     session['patient_data']['symptoms'] = []
     session['state'] = 'waiting_symptoms'
-    
+
     return {
         'message': f'📞 Contact: {contact}\n\n🩺 Please describe your symptoms (e.g., fever, headache, blocked nose, cough):\n\nYou can type multiple symptoms separated by commas.',
         'type': 'text_input',
