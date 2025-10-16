@@ -10,86 +10,6 @@ body {
     overflow: hidden; /* Prevent body scroll since chat takes full window */
 }
 
-/* Main Content Area - REMOVE OR COMMENT OUT if not needed */
-/* .main-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    color: black;
-    text-align: center;
-}
-
-.main-content h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.main-content p {
-    font-size: 1.2rem;
-    opacity: 0.8;
-    margin-bottom: 2rem;
-} */
-
-/* FLOATING BUTTON STYLES - REMOVED (Not needed for full-window) */
-/* .floating-chat-btn {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 60px;
-    height: 60px;
-    border: none;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
-    transition: all 0.3s ease;
-    z-index: 1001;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.floating-chat-btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
-}
-
-.floating-chat-btn.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.5);
-} */
-
-/* CHAT OVERLAY - REMOVED (Not needed for full-window) */
-/* .chat-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.chat-overlay.active {
-    opacity: 1;
-    visibility: visible;
-} */
-
-/* ============================================
-   FULL-WINDOW CHAT CONTAINER
-   ============================================ */
-
 .chat-container {
     position: fixed;
     top: 0;
@@ -922,5 +842,214 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* Close Button - Enhanced Glassmorphism Style */
+.close-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    color: #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 20px;
+    font-weight: 300;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.close-btn i {
+    position: relative;
+    z-index: 2;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover effect with red gradient */
+.close-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff3b3b 0%, #dc3545 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 12px;
+    z-index: 1;
+}
+
+.close-btn:hover {
+    background: rgba(255, 59, 59, 0.15);
+    border-color: rgba(255, 59, 59, 0.4);
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(255, 59, 59, 0.35);
+}
+
+.close-btn:hover::before {
+    opacity: 0.9;
+}
+
+.close-btn:hover i {
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+}
+
+.close-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(255, 59, 59, 0.3);
+}
+
+/* Focus state for accessibility */
+.close-btn:focus {
+    outline: none;
+    border-color: rgba(255, 59, 59, 0.6);
+    box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.15);
+}
+
+/* Light Theme Close Button */
+.light-theme .close-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #555;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.light-theme .close-btn::before {
+    background: linear-gradient(135deg, #ff4757 0%, #dc3545 100%);
+}
+
+.light-theme .close-btn:hover {
+    background: rgba(255, 59, 59, 0.12);
+    border-color: rgba(255, 59, 59, 0.3);
+    box-shadow: 0 4px 16px rgba(255, 59, 59, 0.25);
+}
+
+.light-theme .close-btn:hover i {
+    color: white;
+}
+
+/* Dark Theme Close Button */
+.dark-theme .close-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dark-theme .close-btn::before {
+    background: linear-gradient(135deg, #ff3b3b 0%, #dc3545 100%);
+}
+
+.dark-theme .close-btn:hover {
+    background: rgba(255, 59, 59, 0.15);
+    border-color: rgba(255, 59, 59, 0.4);
+    box-shadow: 0 4px 16px rgba(255, 59, 59, 0.35);
+}
+
+.dark-theme .close-btn:hover i {
+    color: white;
+}
+
+/* Theme Toggle Button - Match Close Button Style */
+.theme-toggle {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    color: #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle i {
+    transition: all 0.4s ease;
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+}
+
+.theme-toggle:hover i {
+    transform: rotate(180deg);
+    color: #ffd700;
+}
+
+.theme-toggle:active {
+    transform: scale(0.95);
+}
+
+/* Light theme toggle */
+.light-theme .theme-toggle {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #555;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.light-theme .theme-toggle:hover {
+    background: rgba(102, 126, 234, 0.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .close-btn,
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .close-btn {
+        font-size: 18px;
+    }
+    
+    .theme-toggle {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .close-btn,
+    .theme-toggle {
+        width: 38px;
+        height: 38px;
+    }
+    
+    .close-btn {
+        font-size: 17px;
+    }
+    
+    .theme-toggle {
+        font-size: 15px;
+    }
+}
+
+/* Header actions spacing */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
 
 /* End of styles.css */

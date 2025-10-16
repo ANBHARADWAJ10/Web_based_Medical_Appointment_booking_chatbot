@@ -549,3 +549,77 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
+// Close chat widget with smooth animation
+function closeChatWidget() {
+    const chatContainer = document.querySelector('.chat-container');
+    const chatWindow = document.querySelector('.chat-window');
+    
+    if (!chatContainer || !chatWindow) return;
+    
+    // Add fade-out animation
+    chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    chatWindow.style.opacity = '0';
+    chatWindow.style.transform = 'scale(0.95)';
+    
+    // After animation completes, hide the container
+    setTimeout(() => {
+        chatContainer.style.display = 'none';
+        chatIsOpen = false;
+        
+        // Restore body scroll if on mobile
+        if (window.innerWidth <= 480) {
+            document.body.style.overflow = '';
+        }
+        
+        // Optional: Redirect to another page or show floating button
+        // window.location.href = '/';
+    }, 300);
+}
+
+// Optional: Reopen chat widget function
+function openChatWidget() {
+    const chatContainer = document.querySelector('.chat-container');
+    const chatWindow = document.querySelector('.chat-window');
+    
+    if (!chatContainer || !chatWindow) return;
+    
+    // Show container
+    chatContainer.style.display = 'flex';
+    
+    // Reset and animate in
+    chatWindow.style.opacity = '0';
+    chatWindow.style.transform = 'scale(0.95)';
+    
+    setTimeout(() => {
+        chatWindow.style.opacity = '1';
+        chatWindow.style.transform = 'scale(1)';
+        chatIsOpen = true;
+        
+        // Prevent body scroll on mobile
+        if (window.innerWidth <= 480) {
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Focus input
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+            messageInput.focus();
+        }
+    }, 50);
+}
+
+// Add escape key handler for closing
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && chatIsOpen) {
+        closeChatWidget();
+    }
+});
+
+// Initialize transitions on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const chatWindow = document.querySelector('.chat-window');
+    if (chatWindow) {
+        chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    }
+});
