@@ -53,35 +53,13 @@ function loadTheme() {
     }
 }
 
-// Open chat widget
-function openChatWidget() {
-    const chatContainer = document.getElementById('chatContainer');
-    const chatOverlay = document.getElementById('chatOverlay');
-    const floatingBtn = document.getElementById('floatingChatBtn');
-    
-    chatContainer.classList.add('active');
-    chatOverlay.classList.add('active');
-    floatingBtn.classList.add('hidden');
-    
-    chatIsOpen = true;
-    
-    setTimeout(() => {
-        document.getElementById('messageInput').focus();
-    }, 400);
-}
-
-// Close chat widget
-function closeChatWidget() {
-    const chatContainer = document.getElementById('chatContainer');
-    const chatOverlay = document.getElementById('chatOverlay');
-    const floatingBtn = document.getElementById('floatingChatBtn');
-    
-    chatContainer.classList.remove('active');
-    chatOverlay.classList.remove('active');
-    floatingBtn.classList.remove('hidden');
-    
-    chatIsOpen = false;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.focus();
+    }
+    chatIsOpen = true; // Always open
+});
 
 // Auto-resize textarea
 function autoResize(textarea) {

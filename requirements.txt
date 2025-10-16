@@ -7,3 +7,5 @@ flask==2.3.3
 Flask-CORS==4.0.0
 
 # .venv\Scripts\Activate.ps1 -- To activate the virtual environment in PowerShell
+# venv\Scripts\activate -- To activate the virtual environment in Command Prompt
+# pip install -r requirements.txt -- To install the required packages listed in requirements.txt

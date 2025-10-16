@@ -10,92 +10,67 @@
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<!-- <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical ChatBot - Book Appointments</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/static/css/styles.css">
-</head> -->
 <body class="dark-theme">
-    <!-- Your main website content -->
-    <div class="main-content">
-        <h1>Medical Chatbot</h1>
-        <p>Book your doctor appointments easily with our AI chatbot assistant.</p>
-        <p>Click the chat button to get started!</p>
-    </div>
 
     <!-- Chat Overlay -->
     <div class="chat-overlay" id="chatOverlay" onclick="closeChatWidget()"></div>
 
-    <!-- Floating Chat Button -->
-    <button class="floating-chat-btn" id="floatingChatBtn" onclick="openChatWidget()">
-        <i class="fas fa-comments"></i>
-    </button>
+ 
 
     <!-- Chat Container -->
     <div class="chat-container" id="chatContainer">
-        <div class="chat-window">
-            <!-- Header -->
-            <div class="chat-header">
-                <div class="header-left">
-                    <!-- <div class="logo">M</div> -->
-                    <div class="header-text">
-                        <h1>Medical ChatBot</h1>
-                        <p>Appointment Booking</p>
-                        <p>type - end to end the conversation</p>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                    <button class="close-btn" onclick="closeChatWidget()">
-                        <i class="fas fa-times"></i>
-                    </button>
+    <div class="chat-window">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="header-text">
+                    <h1>Medical ChatBot</h1>
+                    <p>Appointment Booking</p>
+                    <p>type - end to end the conversation</p>
                 </div>
             </div>
-
-            <!-- Messages Container -->
-            <div class="messages-container" id="messagesContainer">
-                <!-- Initial greeting -->
-                <div class="message assistant">
-                    <div class="message-avatar">M</div>
-                    <div class="message-content">
-                        <div class="message-bubble">
-                            🏥 Welcome to Medical Chatbot! 🏥<br><br>
-                            select from the options below to get started:<br><br>
-                            <!-- I can help you with:<br>
-                            • Check your existing booking details with unique code<br>
-                            • Book a new doctor's appointment<br><br> -->
-                            <!-- Please type:<br>
-                            - "Check booking" to check existing appointment<br>
-                            - "Book appointment" to schedule new appointment -->
-                        </div>
-                        <div class="message-time" id="initialTime"></div>
-                    </div>
-                </div>
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <!-- Close button removed -->
             </div>
+        </div>
 
-            <!-- Input Area -->
-            <div class="input-container">
-                <div class="input-wrapper">
-                    <textarea 
-                        class="input-field" 
-                        placeholder="Type your message..." 
-                        rows="1"
-                        id="messageInput"
-                        onkeydown="handleKeyPress(event)"
-                        oninput="autoResize(this)"
-                    ></textarea>
-                    <button class="send-button" onclick="sendMessage()" id="sendButton">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <!-- Initial greeting -->
+            <div class="message assistant">
+                <div class="message-avatar">M</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        🏥 Welcome to Medical Chatbot! 🏥<br><br>
+                        select from the options below to get started:<br><br>
+                    </div>
+                    <div class="message-time" id="initialTime"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea 
+                    class="input-field" 
+                    placeholder="Type your message..." 
+                    rows="1"
+                    id="messageInput"
+                    onkeydown="handleKeyPress(event)"
+                    oninput="autoResize(this)"
+                ></textarea>
+                <button class="send-button" onclick="sendMessage()" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
     </div>
+</div>
+
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
