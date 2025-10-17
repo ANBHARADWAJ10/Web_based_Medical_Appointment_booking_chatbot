@@ -738,4 +738,8 @@ function disableNameOnlyValidation() {
 }
 
 
-
+// Close chat and notify parent window
+function closeParentChat() {
+    // Send message to parent window to close the chat
+    window.parent.postMessage({action: 'closeChat'}, '*');
+}
