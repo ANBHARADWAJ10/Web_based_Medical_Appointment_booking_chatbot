@@ -320,6 +320,8 @@ function addBotMessage(data) {
     }
     
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    handleValidationPrompt(data.message);
 }
 
 // Check if response type should show buttons
@@ -551,6 +553,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Close chat widget with smooth animation
+// function closeChatWidget() {
+//     const chatContainer = document.querySelector('.chat-container');
+//     const chatWindow = document.querySelector('.chat-window');
+    
+//     if (!chatContainer || !chatWindow) return;
+    
+//     // Add fade-out animation
+//     chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+//     chatWindow.style.opacity = '0';
+//     chatWindow.style.transform = 'scale(0.95)';
+    
+//     // After animation completes, hide the container
+//     setTimeout(() => {
+//         chatContainer.style.display = 'none';
+//         chatIsOpen = false;
+        
+//         // Restore body scroll if on mobile
+//         if (window.innerWidth <= 480) {
+//             document.body.style.overflow = '';
+//         }
+        
+//         // Optional: Redirect to another page or show floating button
+//         // window.location.href = '/';
+//     }, 300);
+// }
+
 function closeChatWidget() {
     const chatContainer = document.querySelector('.chat-container');
     const chatWindow = document.querySelector('.chat-window');
@@ -562,20 +590,21 @@ function closeChatWidget() {
     chatWindow.style.opacity = '0';
     chatWindow.style.transform = 'scale(0.95)';
     
-    // After animation completes, hide the container
+    // After animation completes, hide both elements
     setTimeout(() => {
-        chatContainer.style.display = 'none';
+        chatWindow.style.display = 'none';      // 👈 Hide chat window
+        chatContainer.style.display = 'none';   // 👈 Hide chat container completely
         chatIsOpen = false;
         
         // Restore body scroll if on mobile
         if (window.innerWidth <= 480) {
             document.body.style.overflow = '';
         }
-        
-        // Optional: Redirect to another page or show floating button
-        // window.location.href = '/';
+
+        console.log('Chat window closed and hidden.');
     }, 300);
 }
+
 
 // Optional: Reopen chat widget function
 function openChatWidget() {
@@ -623,3 +652,89 @@ document.addEventListener('DOMContentLoaded', function() {
         chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
     }
 });
+
+
+// Validations
+
+// Validation flags
+let isContactPromptActive = false;
+let isNamePromptActive = false;
+
+// Detect and enable proper validation based on bot message
+function handleValidationPrompt(botMessage) {
+    const lowerMsg = botMessage.toLowerCase();
+
+    if (lowerMsg.includes('please enter your contact number')) {
+        isContactPromptActive = true;
+        isNamePromptActive = false;
+        enableContactOnlyValidation();
+        disableNameOnlyValidation();
+    } else if (
+        lowerMsg.includes("please enter your full name") ||
+        lowerMsg.includes("enter your name") ||
+        lowerMsg.includes("patient name")
+    ) {
+        isNamePromptActive = true;
+        isContactPromptActive = false;
+        enableNameOnlyValidation();
+        disableContactOnlyValidation();
+    } else {
+        // No validation needed
+        isContactPromptActive = false;
+        isNamePromptActive = false;
+        disableContactOnlyValidation();
+        disableNameOnlyValidation();
+    }
+}
+
+// === CONTACT VALIDATION ===
+function enableContactOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.value = input.value.replace(/\D/g, '').slice(0, 10);
+    input.setAttribute('maxlength', '10');
+
+    disableNameOnlyValidation(); // avoid overlap
+    input.removeEventListener('input', contactValidationHandler);
+    input.addEventListener('input', contactValidationHandler);
+}
+
+function contactValidationHandler(e) {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+}
+
+function disableContactOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.removeAttribute('maxlength');
+    input.removeEventListener('input', contactValidationHandler);
+}
+
+// === NAME VALIDATION ===
+function enableNameOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.value = input.value.replace(/[^a-zA-Z ]/g, '');
+    input.setAttribute('maxlength', '50');
+
+    disableContactOnlyValidation(); // avoid overlap
+    input.removeEventListener('input', nameValidationHandler);
+    input.addEventListener('input', nameValidationHandler);
+}
+
+function nameValidationHandler(e) {
+    this.value = this.value.replace(/[^a-zA-Z ]/g, '');
+}
+
+function disableNameOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.removeAttribute('maxlength');
+    input.removeEventListener('input', nameValidationHandler);
+}
+
+
