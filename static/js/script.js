@@ -579,31 +579,31 @@ document.addEventListener('DOMContentLoaded', function() {
 //     }, 300);
 // }
 
-function closeChatWidget() {
-    const chatContainer = document.querySelector('.chat-container');
-    const chatWindow = document.querySelector('.chat-window');
+// function closeChatWidget() {
+//     const chatContainer = document.querySelector('.chat-container');
+//     const chatWindow = document.querySelector('.chat-window');
     
-    if (!chatContainer || !chatWindow) return;
+//     if (!chatContainer || !chatWindow) return;
     
-    // Add fade-out animation
-    chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    chatWindow.style.opacity = '0';
-    chatWindow.style.transform = 'scale(0.95)';
+//     // Add fade-out animation
+//     chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+//     chatWindow.style.opacity = '0';
+//     chatWindow.style.transform = 'scale(0.95)';
     
-    // After animation completes, hide both elements
-    setTimeout(() => {
-        chatWindow.style.display = 'none';      // 👈 Hide chat window
-        chatContainer.style.display = 'none';   // 👈 Hide chat container completely
-        chatIsOpen = false;
+//     // After animation completes, hide both elements
+//     setTimeout(() => {
+//         chatWindow.style.display = 'none';      // 👈 Hide chat window
+//         chatContainer.style.display = 'none';   // 👈 Hide chat container completely
+//         chatIsOpen = false;
         
-        // Restore body scroll if on mobile
-        if (window.innerWidth <= 480) {
-            document.body.style.overflow = '';
-        }
+//         // Restore body scroll if on mobile
+//         if (window.innerWidth <= 480) {
+//             document.body.style.overflow = '';
+//         }
 
-        console.log('Chat window closed and hidden.');
-    }, 300);
-}
+//         console.log('Chat window closed and hidden.');
+//     }, 300);
+// }
 
 
 // Optional: Reopen chat widget function
