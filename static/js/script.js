@@ -737,4 +737,90 @@ function disableNameOnlyValidation() {
     input.removeEventListener('input', nameValidationHandler);
 }
 
+// Validations
+
+// Validation flags
+let isContactPromptActive = false;
+let isNamePromptActive = false;
+
+// Detect and enable proper validation based on bot message
+function handleValidationPrompt(botMessage) {
+    const lowerMsg = botMessage.toLowerCase();
+
+    if (lowerMsg.includes('please enter your contact number')) {
+        isContactPromptActive = true;
+        isNamePromptActive = false;
+        enableContactOnlyValidation();
+        disableNameOnlyValidation();
+    } else if (
+        lowerMsg.includes("please enter your full name") ||
+        lowerMsg.includes("enter your name") ||
+        lowerMsg.includes("patient name")
+    ) {
+        isNamePromptActive = true;
+        isContactPromptActive = false;
+        enableNameOnlyValidation();
+        disableContactOnlyValidation();
+    } else {
+        // No validation needed
+        isContactPromptActive = false;
+        isNamePromptActive = false;
+        disableContactOnlyValidation();
+        disableNameOnlyValidation();
+    }
+}
+
+// === CONTACT VALIDATION ===
+function enableContactOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.value = input.value.replace(/\D/g, '').slice(0, 10);
+    input.setAttribute('maxlength', '10');
+
+    disableNameOnlyValidation(); // avoid overlap
+    input.removeEventListener('input', contactValidationHandler);
+    input.addEventListener('input', contactValidationHandler);
+}
+
+function contactValidationHandler(e) {
+    this.value = this.value.replace(/\D/g, '').slice(0, 10);
+}
+
+function disableContactOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.removeAttribute('maxlength');
+    input.removeEventListener('input', contactValidationHandler);
+}
+
+// === NAME VALIDATION ===
+function enableNameOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.value = input.value.replace(/[^a-zA-Z ]/g, '');
+    input.setAttribute('maxlength', '50');
+
+    disableContactOnlyValidation(); // avoid overlap
+    input.removeEventListener('input', nameValidationHandler);
+    input.addEventListener('input', nameValidationHandler);
+}
+
+function nameValidationHandler(e) {
+    this.value = this.value.replace(/[^a-zA-Z ]/g, '');
+}
+
+function disableNameOnlyValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+
+    input.removeAttribute('maxlength');
+    input.removeEventListener('input', nameValidationHandler);
+}
+
+
+
+
 
