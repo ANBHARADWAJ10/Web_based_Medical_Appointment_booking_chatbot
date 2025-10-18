@@ -12,9 +12,7 @@ body {
 }
 
 
-/* ============================================
-   FULL-WINDOW CHAT CONTAINER
-   ============================================ */
+/* chat container */
 
 
 .chat-container {
@@ -97,9 +95,7 @@ body {
 }
 
 
-/* ============================================
-   THEME TOGGLE & CLOSE BUTTON - MATCHING STYLES
-   ============================================ */
+/* Theme-togglebtn and closebtn */
 
 
 .theme-toggle,
@@ -415,9 +411,7 @@ body {
 }
 
 
-/* ============================================
-   INTERACTIVE BUTTON STYLES
-   ============================================ */
+/* button styles */
 
 
 .button-container {
@@ -613,11 +607,7 @@ body {
     animation: buttonFadeIn 0.3s ease-out;
 }
 
-
-/* ============================================
-   THEME STYLES
-   ============================================ */
-
+/* Themes */
 
 .chat-window.light-theme {
     background: #F2F0EF;
@@ -803,9 +793,7 @@ body {
 }
 
 
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
+/* Responsive design */
 
 
 @media (max-width: 768px) {
@@ -934,9 +922,7 @@ body {
 }
 
 
-/* ============================================
-   SPECIAL BUTTON STATES
-   ============================================ */
+/* states of the button */
 
 
 .success-button {
@@ -974,9 +960,7 @@ body {
 }
 
 
-/* ============================================
-   LOADING STATES
-   ============================================ */
+/* loading states */
 
 
 .button-loading {
@@ -1007,5 +991,3 @@ body {
     }
 }
 
-
-/* End of styles.css */

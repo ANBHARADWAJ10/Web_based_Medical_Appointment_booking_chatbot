@@ -1124,8 +1124,8 @@ def handle_date_selection(message, session):
             time_slots = [slot for slot in selected_date_info['time_slots'] if not slot['is_booked']]
             session['available_time_slots'] = time_slots
             
-            response_text = f"📅 **Selected Date:** {selected_date_info['display_name']}\n\n"
-            response_text += "🕐 **Available Time Slots:**\n"
+            response_text = f"📅 Selected Date: {selected_date_info['display_name']}\n\n"
+            response_text += "🕐 Available Time Slots:\n"
             response_text += "Please select a time slot from the options below:"
             
             return {
@@ -1188,7 +1188,7 @@ def handle_time_selection(message, session):
                 }
             else:
                 return {
-                    'message': f"❌ **Booking Failed**\n\n{result}\n\nPlease try again or contact support.\n\nType 'menu' to return to main menu.",
+                    'message': f"❌ Booking Failed \n\n{result}\n\nPlease try again or contact support.\n\nType 'menu' to return to main menu.",
                     'type': 'error'
                 }
         else:

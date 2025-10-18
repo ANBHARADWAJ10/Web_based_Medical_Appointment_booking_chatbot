@@ -41,74 +41,13 @@ function toggleTheme() {
     // Save user's choice for future theme toggles (but page will still load dark)
     localStorage.setItem('medical-chatbot-theme', isDarkTheme ? 'dark' : 'light');
 }
-// Load saved theme on page load
-// function loadTheme() {
-//     const savedTheme = localStorage.getItem('medical-chatbot-theme') || 'dark';
-//     const chatWindow = document.querySelector('.chat-window');
-//     const body = document.body;
-//     const themeIcon = document.querySelector('.theme-toggle i');
-    
-//     isDarkTheme = savedTheme === 'dark';
-    
-//     if (isDarkTheme) {
-//         body.classList.add('dark-theme');
-//         chatWindow.classList.add('dark-theme');
-//         themeIcon.className = 'fas fa-sun';
-//     } else {
-//         body.classList.add('light-theme');
-//         chatWindow.classList.add('light-theme');
-//         themeIcon.className = 'fas fa-moon';
-//     }
-// }
 
-// function loadTheme() {
-//     const chatWindow = document.querySelector('.chat-window');
-//     const body = document.body;
-//     const themeIcon = document.querySelector('.theme-toggle i');
-    
-//     // Check if user has visited before
-//     const hasVisited = localStorage.getItem('medical-chatbot-visited');
-//     const savedTheme = localStorage.getItem('medical-chatbot-theme');
-    
-//     if (!hasVisited) {
-//         // First visit - force dark theme
-//         isDarkTheme = true;
-//         localStorage.setItem('medical-chatbot-visited', 'true');
-//         localStorage.setItem('medical-chatbot-theme', 'dark');
-//     } else {
-//         // Returning user - use their saved preference (default to dark if none)
-//         isDarkTheme = (savedTheme === 'light') ? false : true;
-//     }
-    
-//     // Apply the theme
-//     if (isDarkTheme) {
-//         body.classList.remove('light-theme');
-//         body.classList.add('dark-theme');
-//         if (chatWindow) {
-//             chatWindow.classList.remove('light-theme');
-//             chatWindow.classList.add('dark-theme');
-//         }
-//         if (themeIcon) {
-//             themeIcon.className = 'fas fa-sun';
-//         }
-//     } else {
-//         body.classList.remove('dark-theme');
-//         body.classList.add('light-theme');
-//         if (chatWindow) {
-//             chatWindow.classList.remove('dark-theme');  
-//             chatWindow.classList.add('light-theme');
-//         }
-//         if (themeIcon) {
-//             themeIcon.className = 'fas fa-moon';
-//         }
-//     }
-// }
 function loadTheme() {
     const chatWindow = document.querySelector('.chat-window');
     const body = document.body;
     const themeIcon = document.querySelector('.theme-toggle i');
     
-    // FORCE dark theme on initial load (ignore localStorage)
+    // forcing the dark theme on initial load (ignore the localStorage)
     isDarkTheme = true;
     
     // Apply dark theme
@@ -625,61 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Close chat widget with smooth animation
-// function closeChatWidget() {
-//     const chatContainer = document.querySelector('.chat-container');
-//     const chatWindow = document.querySelector('.chat-window');
-    
-//     if (!chatContainer || !chatWindow) return;
-    
-//     // Add fade-out animation
-//     chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-//     chatWindow.style.opacity = '0';
-//     chatWindow.style.transform = 'scale(0.95)';
-    
-//     // After animation completes, hide the container
-//     setTimeout(() => {
-//         chatContainer.style.display = 'none';
-//         chatIsOpen = false;
-        
-//         // Restore body scroll if on mobile
-//         if (window.innerWidth <= 480) {
-//             document.body.style.overflow = '';
-//         }
-        
-//         // Optional: Redirect to another page or show floating button
-//         // window.location.href = '/';
-//     }, 300);
-// }
 
-// function closeChatWidget() {
-//     const chatContainer = document.querySelector('.chat-container');
-//     const chatWindow = document.querySelector('.chat-window');
-    
-//     if (!chatContainer || !chatWindow) return;
-    
-//     // Add fade-out animation
-//     chatWindow.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-//     chatWindow.style.opacity = '0';
-//     chatWindow.style.transform = 'scale(0.95)';
-    
-//     // After animation completes, hide both elements
-//     setTimeout(() => {
-//         chatWindow.style.display = 'none';      // 👈 Hide chat window
-//         chatContainer.style.display = 'none';   // 👈 Hide chat container completely
-//         chatIsOpen = false;
-        
-//         // Restore body scroll if on mobile
-//         if (window.innerWidth <= 480) {
-//             document.body.style.overflow = '';
-//         }
-
-//         console.log('Chat window closed and hidden.');
-//     }, 300);
-// }
-
-
-// Optional: Reopen chat widget function
+// To Reopen chat widget function
 function openChatWidget() {
     const chatContainer = document.querySelector('.chat-container');
     const chatWindow = document.querySelector('.chat-window');
@@ -727,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-// Validations
+// Validations ---- ///
 
 // Validation flags
 let isContactPromptActive = false;
@@ -760,7 +646,7 @@ function handleValidationPrompt(botMessage) {
     }
 }
 
-// === CONTACT VALIDATION ===
+// Contatct number validation
 function enableContactOnlyValidation() {
     const input = document.getElementById('messageInput');
     if (!input) return;
@@ -785,7 +671,7 @@ function disableContactOnlyValidation() {
     input.removeEventListener('input', contactValidationHandler);
 }
 
-// === NAME VALIDATION ===
+// Name validation
 function enableNameOnlyValidation() {
     const input = document.getElementById('messageInput');
     if (!input) return;
