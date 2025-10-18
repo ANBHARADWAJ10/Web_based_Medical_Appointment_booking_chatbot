@@ -19,38 +19,111 @@ function toggleTheme() {
     if (isDarkTheme) {
         body.classList.remove('light-theme');
         body.classList.add('dark-theme');
-        chatWindow.classList.remove('light-theme');
-        chatWindow.classList.add('dark-theme');
-        themeIcon.className = 'fas fa-sun';
+        if (chatWindow) {
+            chatWindow.classList.remove('light-theme');
+            chatWindow.classList.add('dark-theme');
+        }
+        if (themeIcon) {
+            themeIcon.className = 'fas fa-sun';
+        }
     } else {
         body.classList.remove('dark-theme');
         body.classList.add('light-theme');
-        chatWindow.classList.remove('dark-theme');
-        chatWindow.classList.add('light-theme');
-        themeIcon.className = 'fas fa-moon';
+        if (chatWindow) {
+            chatWindow.classList.remove('dark-theme');
+            chatWindow.classList.add('light-theme');
+        }
+        if (themeIcon) {
+            themeIcon.className = 'fas fa-moon';
+        }
     }
     
+    // Save user's choice for future theme toggles (but page will still load dark)
     localStorage.setItem('medical-chatbot-theme', isDarkTheme ? 'dark' : 'light');
 }
-
 // Load saved theme on page load
+// function loadTheme() {
+//     const savedTheme = localStorage.getItem('medical-chatbot-theme') || 'dark';
+//     const chatWindow = document.querySelector('.chat-window');
+//     const body = document.body;
+//     const themeIcon = document.querySelector('.theme-toggle i');
+    
+//     isDarkTheme = savedTheme === 'dark';
+    
+//     if (isDarkTheme) {
+//         body.classList.add('dark-theme');
+//         chatWindow.classList.add('dark-theme');
+//         themeIcon.className = 'fas fa-sun';
+//     } else {
+//         body.classList.add('light-theme');
+//         chatWindow.classList.add('light-theme');
+//         themeIcon.className = 'fas fa-moon';
+//     }
+// }
+
+// function loadTheme() {
+//     const chatWindow = document.querySelector('.chat-window');
+//     const body = document.body;
+//     const themeIcon = document.querySelector('.theme-toggle i');
+    
+//     // Check if user has visited before
+//     const hasVisited = localStorage.getItem('medical-chatbot-visited');
+//     const savedTheme = localStorage.getItem('medical-chatbot-theme');
+    
+//     if (!hasVisited) {
+//         // First visit - force dark theme
+//         isDarkTheme = true;
+//         localStorage.setItem('medical-chatbot-visited', 'true');
+//         localStorage.setItem('medical-chatbot-theme', 'dark');
+//     } else {
+//         // Returning user - use their saved preference (default to dark if none)
+//         isDarkTheme = (savedTheme === 'light') ? false : true;
+//     }
+    
+//     // Apply the theme
+//     if (isDarkTheme) {
+//         body.classList.remove('light-theme');
+//         body.classList.add('dark-theme');
+//         if (chatWindow) {
+//             chatWindow.classList.remove('light-theme');
+//             chatWindow.classList.add('dark-theme');
+//         }
+//         if (themeIcon) {
+//             themeIcon.className = 'fas fa-sun';
+//         }
+//     } else {
+//         body.classList.remove('dark-theme');
+//         body.classList.add('light-theme');
+//         if (chatWindow) {
+//             chatWindow.classList.remove('dark-theme');  
+//             chatWindow.classList.add('light-theme');
+//         }
+//         if (themeIcon) {
+//             themeIcon.className = 'fas fa-moon';
+//         }
+//     }
+// }
 function loadTheme() {
-    const savedTheme = localStorage.getItem('medical-chatbot-theme') || 'dark';
     const chatWindow = document.querySelector('.chat-window');
     const body = document.body;
     const themeIcon = document.querySelector('.theme-toggle i');
     
-    isDarkTheme = savedTheme === 'dark';
+    // FORCE dark theme on initial load (ignore localStorage)
+    isDarkTheme = true;
     
-    if (isDarkTheme) {
-        body.classList.add('dark-theme');
+    // Apply dark theme
+    body.classList.remove('light-theme');
+    body.classList.add('dark-theme');
+    if (chatWindow) {
+        chatWindow.classList.remove('light-theme');
         chatWindow.classList.add('dark-theme');
-        themeIcon.className = 'fas fa-sun';
-    } else {
-        body.classList.add('light-theme');
-        chatWindow.classList.add('light-theme');
-        themeIcon.className = 'fas fa-moon';
     }
+    if (themeIcon) {
+        themeIcon.className = 'fas fa-sun';
+    }
+    
+    // Update localStorage to reflect current state
+    localStorage.setItem('medical-chatbot-theme', 'dark');
 }
 
 document.addEventListener('DOMContentLoaded', function() {

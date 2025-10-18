@@ -894,18 +894,18 @@ def handle_code_input(message, session):
     if booking_details:
         session['state'] = 'greeting'  # Reset to main menu
         
-        details_text = f"📋 **Booking Details:**\n\n"
-        details_text += f"🔑 **Unique Code:** {booking_details['uniqueCode']}\n\n"
-        details_text += f"👤 **Patient Information:**\n"
+        details_text = f"📋 Booking Details:\n\n"
+        details_text += f"🔑 Unique Code: {booking_details['uniqueCode']}\n\n"
+        details_text += f"👤 Patient Information:\n"
         details_text += f"• Name: {booking_details['patient']['name']}\n"
         details_text += f"• Age: {booking_details['patient']['age']}\n"
         details_text += f"• Gender: {booking_details['patient']['gender']}\n"
         details_text += f"• Blood Group: {booking_details['patient']['blood']}\n"
         details_text += f"• Contact: {booking_details['patient']['contact']}\n\n"
-        details_text += f"👨⚕️ **Doctor Information:**\n"
+        details_text += f"👨⚕️ Doctor Information:\n"
         details_text += f"• Doctor: {booking_details['doctor']['name']}\n"
         details_text += f"• Specialty: {booking_details['doctor']['specialty']}\n\n"
-        details_text += f"📅 **Appointment Details:**\n"
+        details_text += f"📅 Appointment Details:\n"
         details_text += f"• Date: {booking_details['appointment']['date']}\n"
         details_text += f"• Status: {booking_details['appointment']['status'].title()}\n\n"
         details_text += "You can type 'menu' to return to main menu."
@@ -1053,10 +1053,10 @@ def handle_symptoms_input(message, session):
     session['state'] = 'waiting_doctor_selection'
     
     analysis_text = f"✅ Recorded symptoms: {', '.join(symptoms)}\n\n"
-    analysis_text += f"🔍 **Pre-Analysis Results:**\n"
-    analysis_text += f"📝 **Your Symptoms:** {', '.join(session['patient_data']['symptoms'])}\n"
-    analysis_text += f"🧪 **Matched Symptoms:** {', '.join(matched_symptoms) if matched_symptoms else 'General symptoms detected'}\n\n"
-    analysis_text += "👨⚕️ **Available Doctors:**\n"
+    analysis_text += f"🔍 Pre-Analysis Results:\n"
+    analysis_text += f"📝 Your Symptoms: {', '.join(session['patient_data']['symptoms'])}\n"
+    analysis_text += f"🧪 Matched Symptoms: {', '.join(matched_symptoms) if matched_symptoms else 'General symptoms detected'}\n\n"
+    analysis_text += "👨⚕️ Available Doctors:\n"
     analysis_text += "Please select a doctor from the options below:"
     
     return {
@@ -1083,10 +1083,10 @@ def handle_doctor_selection(message, session):
             dates = bot.get_next_7_upcoming_dates(selected_doctor)
             session['available_dates'] = dates
             
-            response_text = f"👨⚕️ **Selected Doctor:** {selected_doctor['name']}\n"
-            response_text += f"🏥 **Specialty:** {selected_doctor['specialty']}\n"
-            response_text += f"🕐 **Availability:** {selected_doctor.get('startTime', 'N/A')} - {selected_doctor.get('endTime', 'N/A')}\n\n"
-            response_text += "📅 **Available Appointment Dates:**\n"
+            response_text = f"👨⚕️ Selected Doctor: {selected_doctor['name']}\n"
+            response_text += f"🏥 Specialty: {selected_doctor['specialty']}\n"
+            response_text += f"🕐 Availability: {selected_doctor.get('startTime', 'N/A')} - {selected_doctor.get('endTime', 'N/A')}\n\n"
+            response_text += "📅 Available Appointment Dates:\n"
             response_text += "Please select a date from the options below:"
             
             return {
@@ -1166,14 +1166,14 @@ def handle_time_selection(message, session):
                 doctor_info = patient_data.get('selected_doctor')
                 unique_code = result['unique_code']
                 
-                confirmation_message = f"✅ **Appointment Confirmed!**\n\n"
-                confirmation_message += f"🔑 **Your Unique Code:** {unique_code}\n"
-                confirmation_message += f"*Save this code to check your booking details anytime*\n\n"
-                confirmation_message += f"👤 **Patient:** {patient_data['name']}\n"
-                confirmation_message += f"📞 **Contact:** {patient_data['contact']}\n"
-                confirmation_message += f"🩺 **Doctor:** {doctor_info['name']}\n"
-                confirmation_message += f"📅 **Date:** {patient_data['selected_date_display']}\n"
-                confirmation_message += f"🕐 **Time Slot:** {selected_time_slot['time']}\n\n"
+                confirmation_message = f"✅Appointment Confirmed!\n\n"
+                confirmation_message += f"🔑 Your Unique Code: {unique_code}\n"
+                confirmation_message += f"Save this code to check your booking details anytime\n\n"
+                confirmation_message += f"👤 Patient: {patient_data['name']}\n"
+                confirmation_message += f"📞 Contact: {patient_data['contact']}\n"
+                confirmation_message += f"🩺 Doctor: {doctor_info['name']}\n"
+                confirmation_message += f"📅 Date: {patient_data['selected_date_display']}\n"
+                confirmation_message += f"🕐 Time Slot: {selected_time_slot['time']}\n\n"
                 confirmation_message += f"Thank you for booking with us! Use your unique code {unique_code} to check details anytime.\n\n"
                 confirmation_message += "Type 'menu' to return to main menu for new booking."
                 
