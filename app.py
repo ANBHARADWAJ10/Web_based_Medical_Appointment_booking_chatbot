@@ -88,10 +88,8 @@ class MedicalChatBot:
         try:
             self.mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
             self.db = self.mongo_client['hospital']
-            self.dates_collection = self.db['dates']
             self.doctors_collection = self.db['doctors']
             self.patients_collection = self.db['patients']
-            self.confirmations_collection = self.db['confirmations']
             
             # Test the connection
             self.mongo_client.admin.command('ping')
@@ -189,7 +187,6 @@ class MedicalChatBot:
         """Generate 8-digit unique code"""
         while True:
             code = ''.join(random.choices(string.digits, k=8))
-            
             # In demo mode, just return the code
             if not self.mongo_client:
                 return code
@@ -203,7 +200,7 @@ class MedicalChatBot:
                 return code
     
     def get_booking_details_by_code(self, unique_code):
-        """Get complete booking details by unique code"""
+        """Get complete booking details by unique code from patient collection"""
         if not self.mongo_client:
             # Demo mode - return mock data
             return {
@@ -221,29 +218,25 @@ class MedicalChatBot:
                 },
                 "appointment": {
                     "date": "10/15/2025",
+                    "time": "10:00 AM",
                     "status": "confirmed",
                     "createdAt": datetime.now().isoformat(),
-                },
-                "confirmationId": "demo123",
-                "patientId": "demo456"
+                }
             }
         
         try:
-            # Find patient by unique code
+            # Find patient by unique code - all data is in patient collection
             patient = self.patients_collection.find_one({"uniqueCode": unique_code})
+            
             if not patient:
                 return None
             
-            # Find confirmation for this patient
-            confirmation = self.confirmations_collection.find_one({"patient": patient["_id"]})
-            if not confirmation:
-                return None
-            
             # Get doctor details if doctor ID exists
-            doctor_name = confirmation.get("doctorName", "N/A")
+            doctor_name = patient.get("doctorName", "N/A")
             doctor_specialty = "N/A"
-            if confirmation.get("doctor"):
-                doctor = self.doctors_collection.find_one({"_id": confirmation["doctor"]})
+            
+            if patient.get("doctor"):
+                doctor = self.doctors_collection.find_one({"_id": patient["doctor"]})
                 if doctor:
                     doctor_specialty = doctor.get("specialty", "N/A")
             
@@ -262,12 +255,11 @@ class MedicalChatBot:
                     "specialty": doctor_specialty,
                 },
                 "appointment": {
-                    "date": confirmation.get("date", ""),
-                    "status": confirmation.get("status", ""),
-                    "createdAt": confirmation.get("createdAt", ""),
-                },
-                "confirmationId": str(confirmation.get("_id", "")),
-                "patientId": str(patient.get("_id", ""))
+                    "date": patient.get("date", ""),
+                    "time": patient.get("slot", ""),
+                    "status": patient.get("status", "confirmed"),
+                    "createdAt": patient.get("createdAt", ""),
+                }
             }
             
             return booking_details
@@ -277,7 +269,7 @@ class MedicalChatBot:
             return None
     
     def save_patient_to_db(self, patient_data, unique_code):
-        """Save patient information to MongoDB patients collection with unique code"""
+        """Save complete patient and appointment information to MongoDB patients collection"""
         if not self.mongo_client:
             # Demo mode
             return "demo_patient_id"
@@ -289,8 +281,13 @@ class MedicalChatBot:
                 "gender": patient_data.get('gender', ''),
                 "blood": patient_data.get('blood_group', ''),
                 "contact": patient_data.get('contact', ''),
-                "uniqueCode": unique_code,
                 "symptoms": patient_data.get('symptoms', []),
+                "doctor": patient_data.get('doctor_id'),
+                "doctorName": patient_data.get('doctor_name', ''),
+                "date": patient_data.get('appointment_date'),
+                "slot": patient_data.get('selected_slot', ''),
+                "status": "confirmed",
+                "uniqueCode": unique_code,
                 "matchedSymptoms": patient_data.get('matched_symptoms', []),
                 "possibleDiseases": patient_data.get('possible_diseases', []),
                 "createdAt": datetime.now(),
@@ -298,104 +295,68 @@ class MedicalChatBot:
             }
             
             result = self.patients_collection.insert_one(patient_document)
-            logger.info(f"Patient saved successfully with ID: {result.inserted_id}")
+            logger.info(f"✅ Patient and appointment saved successfully with ID: {result.inserted_id}")
             return result.inserted_id
         
         except Exception as e:
             logger.error(f"Error saving patient: {e}")
             return None
     
-    def save_confirmation_to_db(self, patient_id, confirmation_data, unique_code):
-        """Save appointment confirmation to MongoDB confirmations collection with unique code"""
+    def get_booked_slots_for_date(self, date_str, doctor_id):
+        """Get already booked slots from patients collection for a specific date and doctor"""
         if not self.mongo_client:
-            # Demo mode
-            return "demo_confirmation_id"
+            return []
         
         try:
-            confirmation_document = {
-                "patient": patient_id,
-                "doctor": confirmation_data.get('doctor_id'),
-                "doctorName": confirmation_data.get('doctor_name', ''),
-                "date": confirmation_data.get('appointment_date'),
-                "slot": confirmation_data.get('selected_slot', ''),
-                "status": confirmation_data.get('status', 'confirmed'),
-                "uniqueCode": unique_code,
-                "createdAt": datetime.now(),
-                "updatedAt": datetime.now()
-            }
+            # Query patients collection for booked appointments
+            booked_appointments = self.patients_collection.find({
+                "date": date_str,
+                "doctor": doctor_id,
+                "status": "confirmed"
+            })
             
-            result = self.confirmations_collection.insert_one(confirmation_document)
-            logger.info(f"Confirmation saved successfully with ID: {result.inserted_id}")
-            return result.inserted_id
+            booked_times = [doc.get('slot', '') for doc in booked_appointments]
+            logger.info(f"Found {len(booked_times)} booked slots for {date_str}")
+            return booked_times
         
         except Exception as e:
-            logger.error(f"Error saving confirmation: {e}")
-            return None
-    
-    def save_booked_slot_to_dates(self, appointment_date, time_slot, doctor_id):
-        """Save the booked appointment slot to dates collection"""
-        if not self.mongo_client:
-            return True
-        
-        try:
-            # Create document for dates collection
-            date_document = {
-                "date": appointment_date,
-                "time": time_slot,
-                "doctorId": doctor_id,
-                "isBooked": True,
-                "bookedAt": datetime.now()
-            }
-            
-            result = self.dates_collection.insert_one(date_document)
-            logger.info(f"Booked slot saved to dates collection with ID: {result.inserted_id}")
-            return True
-        
-        except Exception as e:
-            logger.error(f"Error saving booked slot to dates: {e}")
-            return False
+            logger.error(f"Error fetching booked slots: {e}")
+            return []
     
     def complete_booking_process(self, session_data, slot_data):
-        """Complete booking process by saving both patient and confirmation data with unique code"""
+        """Complete booking process by saving all data to patient collection with unique code"""
         try:
             patient_data = session_data['patient_data']
             
             # Generate unique code
             unique_code = self.generate_unique_code()
             
-            # Step 1: Save patient information with unique code
-            patient_id = self.save_patient_to_db(patient_data, unique_code)
-            if not patient_id:
-                return False, "Failed to save patient information"
-            
-            # Step 2: Prepare confirmation data
-            confirmation_data = {
+            # Prepare complete patient data with appointment details
+            complete_patient_data = {
+                'name': patient_data.get('name'),
+                'age': patient_data.get('age'),
+                'gender': patient_data.get('gender'),
+                'blood_group': patient_data.get('blood_group'),
+                'contact': patient_data.get('contact'),
+                'symptoms': patient_data.get('symptoms', []),
+                'matched_symptoms': patient_data.get('matched_symptoms', []),
+                'possible_diseases': patient_data.get('possible_diseases', []),
                 'doctor_id': patient_data.get('selected_doctor', {}).get('_id'),
                 'doctor_name': patient_data.get('selected_doctor', {}).get('name', ''),
                 'appointment_date': patient_data.get('selected_date'),
-                'appointment_time': patient_data.get('selected_time', ''),
                 'selected_slot': patient_data.get('selected_slot', ''),
-                'status': 'confirmed'
             }
             
-            # Step 3: Save confirmation with unique code
-            confirmation_id = self.save_confirmation_to_db(patient_id, confirmation_data, unique_code)
-            if not confirmation_id:
-                return False, "Failed to save confirmation"
+            # Save everything to patient collection
+            patient_id = self.save_patient_to_db(complete_patient_data, unique_code)
             
-            # Step 4: Save booked slot to dates collection
-            slot_saved = self.save_booked_slot_to_dates(
-                patient_data.get('selected_date'),
-                patient_data.get('selected_time', ''),
-                patient_data.get('selected_doctor', {}).get('_id')
-            )
+            if not patient_id:
+                return False, "Failed to save booking information"
             
-            if not slot_saved:
-                logger.warning("Failed to save slot to dates collection, but booking is confirmed")
+            logger.info(f"✅ Booking completed successfully for patient ID: {patient_id}")
             
             return True, {
-                "patient_id": patient_id,
-                "confirmation_id": confirmation_id,
+                "patient_id": str(patient_id),
                 "unique_code": unique_code
             }
         
@@ -433,12 +394,12 @@ class MedicalChatBot:
                                 logger.info(f"✅ Parsed timing: {start_time} to {end_time}")
                         except Exception as e:
                             logger.error(f"Failed to parse availability: {e}")
-                    
-                    # If still no timing, use defaults
-                    if not start_time or not end_time:
-                        logger.warning(f"⚠️ Using default timing for {doc.get('name')}")
-                        start_time = '9:00 AM'
-                        end_time = '5:00 PM'
+                
+                # If still no timing, use defaults
+                if not start_time or not end_time:
+                    logger.warning(f"⚠️ Using default timing for {doc.get('name')}")
+                    start_time = '9:00 AM'
+                    end_time = '5:00 PM'
                 
                 doctor_info = {
                     '_id': str(doc.get('_id')),
@@ -451,6 +412,7 @@ class MedicalChatBot:
                     'startTime': start_time,
                     'endTime': end_time
                 }
+                
                 doctors.append(doctor_info)
                 logger.info(f"📋 Doctor: {doctor_info['name']} | Timing: {start_time} - {end_time}")
             
@@ -474,7 +436,6 @@ class MedicalChatBot:
     def generate_time_slots(self, start_time_str, end_time_str):
         """Generate 30-minute interval time slots between start and end time, excluding lunch break (1 PM - 2 PM)"""
         time_slots = []
-        
         logger.info(f"🕒 Generating time slots from {start_time_str} to {end_time_str}")
         
         # Parse start and end times
@@ -516,27 +477,6 @@ class MedicalChatBot:
         logger.info(f"✅ Generated {len(time_slots)} slots: {time_slots}")
         return time_slots
     
-    def get_booked_slots_for_date(self, date_str, doctor_id):
-        """Get already booked slots from dates collection for a specific date and doctor"""
-        if not self.mongo_client:
-            return []
-        
-        try:
-            # Query dates collection for booked slots
-            booked_slots_cursor = self.dates_collection.find({
-                "date": date_str,
-                "doctorId": doctor_id,
-                "isBooked": True
-            })
-            
-            booked_times = [doc.get('time', '') for doc in booked_slots_cursor]
-            logger.info(f"Found {len(booked_times)} booked slots for {date_str}")
-            return booked_times
-        
-        except Exception as e:
-            logger.error(f"Error fetching booked slots: {e}")
-            return []
-    
     def get_next_7_upcoming_dates(self, doctor_info=None):
         """Get the next 7 upcoming dates with time slots based on doctor availability"""
         if not self.mongo_client:
@@ -565,6 +505,7 @@ class MedicalChatBot:
                     'time_slots': [{'time': slot, 'is_booked': False} for slot in available_time_slots],
                     'total_available_slots': len(available_time_slots)
                 })
+            
             return mock_dates
         
         try:
@@ -594,11 +535,12 @@ class MedicalChatBot:
             
             # Generate next 7 dates
             upcoming_dates = []
+            
             for i in range(7):
                 date = current_date + timedelta(days=i+1)
                 date_str = date.strftime("%m-%d-%Y")
                 
-                # Get booked slots for this date and doctor
+                # Get booked slots for this date and doctor from patients collection
                 booked_slots = self.get_booked_slots_for_date(date_str, doctor_id) if doctor_id else []
                 
                 # Create time slots with booking status
@@ -769,7 +711,6 @@ def get_doctors():
     try:
         doctors = bot.get_available_doctors()
         return jsonify({'doctors': doctors})
-    
     except Exception as e:
         logger.error(f"Error fetching doctors: {e}")
         return jsonify({'error': 'Error fetching doctors'}), 500
@@ -795,7 +736,6 @@ def get_dates():
         
         dates = bot.get_next_7_upcoming_dates(doctor_info)
         return jsonify({'dates': dates})
-    
     except Exception as e:
         logger.error(f"Error fetching dates: {e}")
         return jsonify({'error': 'Error fetching dates'}), 500
@@ -902,11 +842,12 @@ def handle_code_input(message, session):
         details_text += f"• Gender: {booking_details['patient']['gender']}\n"
         details_text += f"• Blood Group: {booking_details['patient']['blood']}\n"
         details_text += f"• Contact: {booking_details['patient']['contact']}\n\n"
-        details_text += f"👨⚕️ Doctor Information:\n"
+        details_text += f"👨‍⚕️ Doctor Information:\n"
         details_text += f"• Doctor: {booking_details['doctor']['name']}\n"
         details_text += f"• Specialty: {booking_details['doctor']['specialty']}\n\n"
         details_text += f"📅 Appointment Details:\n"
         details_text += f"• Date: {booking_details['appointment']['date']}\n"
+        details_text += f"• Time: {booking_details['appointment']['time']}\n"
         details_text += f"• Status: {booking_details['appointment']['status'].title()}\n\n"
         details_text += "You can type 'menu' to return to main menu."
         
@@ -1056,7 +997,7 @@ def handle_symptoms_input(message, session):
     analysis_text += f"🔍 Pre-Analysis Results:\n"
     analysis_text += f"📝 Your Symptoms: {', '.join(session['patient_data']['symptoms'])}\n"
     analysis_text += f"🧪 Matched Symptoms: {', '.join(matched_symptoms) if matched_symptoms else 'General symptoms detected'}\n\n"
-    analysis_text += "👨⚕️ Available Doctors:\n"
+    analysis_text += "👨‍⚕️ Available Doctors:\n"
     analysis_text += "Please select a doctor from the options below:"
     
     return {
@@ -1083,7 +1024,7 @@ def handle_doctor_selection(message, session):
             dates = bot.get_next_7_upcoming_dates(selected_doctor)
             session['available_dates'] = dates
             
-            response_text = f"👨⚕️ Selected Doctor: {selected_doctor['name']}\n"
+            response_text = f"👨‍⚕️ Selected Doctor: {selected_doctor['name']}\n"
             response_text += f"🏥 Specialty: {selected_doctor['specialty']}\n"
             response_text += f"🕐 Availability: {selected_doctor.get('startTime', 'N/A')} - {selected_doctor.get('endTime', 'N/A')}\n\n"
             response_text += "📅 Available Appointment Dates:\n"
@@ -1100,7 +1041,6 @@ def handle_doctor_selection(message, session):
                 'type': 'doctor_selection',
                 'doctors': session.get('available_doctors', [])
             }
-    
     except ValueError:
         return {
             'message': '❌ Please select a doctor from the options below:',
@@ -1139,7 +1079,6 @@ def handle_date_selection(message, session):
                 'type': 'date_selection',
                 'dates': session.get('available_dates', [])
             }
-    
     except ValueError:
         return {
             'message': '❌ Please select a date from the options below:',
@@ -1166,7 +1105,7 @@ def handle_time_selection(message, session):
                 doctor_info = patient_data.get('selected_doctor')
                 unique_code = result['unique_code']
                 
-                confirmation_message = f"✅Appointment Confirmed!\n\n"
+                confirmation_message = f"✅ Appointment Confirmed!\n\n"
                 confirmation_message += f"🔑 Your Unique Code: {unique_code}\n"
                 confirmation_message += f"Save this code to check your booking details anytime\n\n"
                 confirmation_message += f"👤 Patient: {patient_data['name']}\n"
@@ -1188,7 +1127,7 @@ def handle_time_selection(message, session):
                 }
             else:
                 return {
-                    'message': f"❌ Booking Failed \n\n{result}\n\nPlease try again or contact support.\n\nType 'menu' to return to main menu.",
+                    'message': f"❌ Booking Failed\n\n{result}\n\nPlease try again or contact support.\n\nType 'menu' to return to main menu.",
                     'type': 'error'
                 }
         else:
@@ -1197,7 +1136,6 @@ def handle_time_selection(message, session):
                 'type': 'time_selection',
                 'time_slots': session.get('available_time_slots', [])
             }
-    
     except ValueError:
         return {
             'message': '❌ Please select a time slot from the options below:',
