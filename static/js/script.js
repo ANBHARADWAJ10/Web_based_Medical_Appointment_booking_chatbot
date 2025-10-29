@@ -612,22 +612,86 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function emailValidationHandler(e) {
+    const input = e.target;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const sendButton = document.getElementById('sendButton');
+    
+    // Optional: Restrict certain invalid characters
+    // input.value = input.value.replace(/[\s]/g, ''); // Remove spaces
+    
+    // Visual feedback: Check if email is valid
+    if (input.value.length > 0) {
+        const isValid = emailPattern.test(input.value);
+        
+        // Enable/disable send button based on validity
+        if (sendButton) {
+            sendButton.disabled = !isValid;
+        }
+        
+        // Optional: Add visual styling
+        input.style.borderColor = isValid ? '#4CAF50' : '#ff4444';
+    } else {
+        // Empty input - reset
+        if (sendButton) {
+            sendButton.disabled = false;
+        }
+        input.style.borderColor = '';
+    }
+}
 
-// Validations ---- ///
+function enableEmailValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+    
+    isEmailPromptActive = true;
+    input.setAttribute('type', 'email'); // Use HTML5 email input type
+    input.setAttribute('placeholder', 'example@email.com');
+    
+    // Remove other validation handlers
+    disableContactOnlyValidation();
+    disableNameOnlyValidation();
+    
+    // Add email validation handler
+    input.removeEventListener('input', emailValidationHandler);
+    input.addEventListener('input', emailValidationHandler);
+}
+
+function disableEmailValidation() {
+    const input = document.getElementById('messageInput');
+    if (!input) return;
+    
+    isEmailPromptActive = false;
+    input.removeAttribute('type');
+    input.removeAttribute('placeholder');
+    input.style.borderColor = '';
+    
+    const sendButton = document.getElementById('sendButton');
+    if (sendButton) {
+        sendButton.disabled = false;
+    }
+    
+    input.removeEventListener('input', emailValidationHandler);
+}
+
+// Validations //
 
 // Validation flags
 let isContactPromptActive = false;
 let isNamePromptActive = false;
+let isEmailPromptActive = false;
 
-// Detect and enable proper validation based on bot message
+// enabling validation based on bot's prompt
 function handleValidationPrompt(botMessage) {
     const lowerMsg = botMessage.toLowerCase();
 
     if (lowerMsg.includes('please enter your contact number')) {
         isContactPromptActive = true;
         isNamePromptActive = false;
+        isEmailPromptActive = false;
         enableContactOnlyValidation();
         disableNameOnlyValidation();
+        disableEmailValidation();
     } else if (
         lowerMsg.includes("please enter your full name") ||
         lowerMsg.includes("enter your name") ||
@@ -635,14 +699,28 @@ function handleValidationPrompt(botMessage) {
     ) {
         isNamePromptActive = true;
         isContactPromptActive = false;
+        isEmailPromptActive = false;
         enableNameOnlyValidation();
         disableContactOnlyValidation();
+        disableEmailValidation();
+    } else if (
+        lowerMsg.includes("please enter your email address") ||
+        lowerMsg.includes("enter your email")
+    ) {
+        isEmailPromptActive = true;
+        isContactPromptActive = false;
+        isNamePromptActive = false;
+        enableEmailValidation(); 
+        disableContactOnlyValidation();
+        disableNameOnlyValidation();
     } else {
         // No validation needed
         isContactPromptActive = false;
         isNamePromptActive = false;
+        isEmailPromptActive = false;
         disableContactOnlyValidation();
         disableNameOnlyValidation();
+        disableEmailValidation();
     }
 }
 
