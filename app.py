@@ -2,7 +2,7 @@ import os
 import json
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from typing import Dict, List
 import logging
 from flask import Flask, request, jsonify, render_template
@@ -49,6 +49,7 @@ def download_nltk_data():
             print("✅ Downloaded wordnet successfully")
         except Exception as e:
             print(f"⚠️ Warning: Could not download wordnet: {e}")
+            
     except Exception as e:
         print(f"⚠️ Warning: NLTK download failed: {e}")
         print("📝 Note: You may need to download NLTK data manually")
@@ -187,6 +188,7 @@ class MedicalChatBot:
         """Generate 8-digit unique code"""
         while True:
             code = ''.join(random.choices(string.digits, k=8))
+            
             # In demo mode, just return the code
             if not self.mongo_client:
                 return code
@@ -263,7 +265,7 @@ class MedicalChatBot:
             }
             
             return booking_details
-        
+            
         except Exception as e:
             logger.error(f"Error fetching booking details: {e}")
             return None
@@ -297,7 +299,7 @@ class MedicalChatBot:
             result = self.patients_collection.insert_one(patient_document)
             logger.info(f"✅ Patient and appointment saved successfully with ID: {result.inserted_id}")
             return result.inserted_id
-        
+            
         except Exception as e:
             logger.error(f"Error saving patient: {e}")
             return None
@@ -318,7 +320,7 @@ class MedicalChatBot:
             booked_times = [doc.get('slot', '') for doc in booked_appointments]
             logger.info(f"Found {len(booked_times)} booked slots for {date_str}")
             return booked_times
-        
+            
         except Exception as e:
             logger.error(f"Error fetching booked slots: {e}")
             return []
@@ -354,12 +356,11 @@ class MedicalChatBot:
                 return False, "Failed to save booking information"
             
             logger.info(f"✅ Booking completed successfully for patient ID: {patient_id}")
-            
             return True, {
                 "patient_id": str(patient_id),
                 "unique_code": unique_code
             }
-        
+            
         except Exception as e:
             logger.error(f"Error in complete booking process: {e}")
             return False, f"Booking failed: {str(e)}"
@@ -418,7 +419,7 @@ class MedicalChatBot:
             
             logger.info(f"Found {len(doctors)} available doctors")
             return doctors
-        
+            
         except Exception as e:
             logger.error(f"Error fetching doctors: {e}")
             return self.mock_doctors  # Fallback to mock data
@@ -477,6 +478,24 @@ class MedicalChatBot:
         logger.info(f"✅ Generated {len(time_slots)} slots: {time_slots}")
         return time_slots
     
+    def is_time_slot_past(self, time_str, date_obj):
+        """Check if a time slot has passed for today's date"""
+        try:
+            current_datetime = datetime.now()
+            
+            # If the date is not today, the slot hasn't passed
+            if date_obj.date() != current_datetime.date():
+                return False
+            
+            # Parse the time slot string (e.g., "10:00 AM")
+            slot_time = datetime.strptime(time_str, "%I:%M %p").time()
+            
+            # Compare with current time
+            return slot_time <= current_datetime.time()
+        except Exception as e:
+            logger.error(f"Error checking if time slot is past: {e}")
+            return False
+    
     def get_next_7_upcoming_dates(self, doctor_info=None):
         """Get the next 7 upcoming dates with time slots based on doctor availability"""
         if not self.mongo_client:
@@ -497,13 +516,20 @@ class MedicalChatBot:
             available_time_slots = self.generate_time_slots(start_time_str, end_time_str)
             
             for i in range(7):
-                date = current_date + timedelta(days=i+1)
+                date = current_date + timedelta(days=i)
+                
+                # Filter out past time slots for today
+                filtered_slots = []
+                for slot in available_time_slots:
+                    if not self.is_time_slot_past(slot, date):
+                        filtered_slots.append({'time': slot, 'is_booked': False})
+                
                 mock_dates.append({
                     'date': date.strftime("%m-%d-%Y"),
                     'date_obj': date,
                     'display_name': f"{date.strftime('%A')}, {date.strftime('%B %d, %Y')}",
-                    'time_slots': [{'time': slot, 'is_booked': False} for slot in available_time_slots],
-                    'total_available_slots': len(available_time_slots)
+                    'time_slots': filtered_slots,
+                    'total_available_slots': len(filtered_slots)
                 })
             
             return mock_dates
@@ -533,11 +559,11 @@ class MedicalChatBot:
             available_time_slots = self.generate_time_slots(start_time_str, end_time_str)
             logger.info(f"Generated {len(available_time_slots)} time slots: {available_time_slots}")
             
-            # Generate next 7 dates
+            # Generate next 7 dates (including today)
             upcoming_dates = []
             
             for i in range(7):
-                date = current_date + timedelta(days=i+1)
+                date = current_date + timedelta(days=i)
                 date_str = date.strftime("%m-%d-%Y")
                 
                 # Get booked slots for this date and doctor from patients collection
@@ -546,6 +572,10 @@ class MedicalChatBot:
                 # Create time slots with booking status
                 time_slots = []
                 for time_slot in available_time_slots:
+                    # Skip past time slots for today
+                    if self.is_time_slot_past(time_slot, date):
+                        continue
+                        
                     is_booked = time_slot in booked_slots
                     time_slots.append({
                         'time': time_slot,
@@ -577,6 +607,7 @@ class MedicalChatBot:
         if not NLTK_AVAILABLE or not self.lemmatizer:
             # Simple fallback without NLTK
             words = text.split()
+            
             # Basic stopwords
             basic_stopwords = {'i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'through', 'during', 'before', 'after', 'above', 'below', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once'}
             
@@ -620,6 +651,7 @@ class MedicalChatBot:
         
         # Special handling for common combinations
         symptoms_lower = all_symptoms_text.lower()
+        
         if 'blocked nose' in symptoms_lower or 'stuffy nose' in symptoms_lower:
             matched_symptoms.append('blocked_nose')
             possible_diseases.update(['Common Cold', 'Allergic Rhinitis', 'Sinusitis'])
@@ -673,7 +705,7 @@ def chat():
         })
         
         return jsonify(response)
-    
+        
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -700,7 +732,7 @@ def check_booking():
                 'success': False,
                 'error': 'Code not found. Please check your code and try again.'
             })
-    
+            
     except Exception as e:
         logger.error(f"Error checking booking: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -736,6 +768,7 @@ def get_dates():
         
         dates = bot.get_next_7_upcoming_dates(doctor_info)
         return jsonify({'dates': dates})
+        
     except Exception as e:
         logger.error(f"Error fetching dates: {e}")
         return jsonify({'error': 'Error fetching dates'}), 500
@@ -804,6 +837,7 @@ def handle_greeting(message, session):
             'type': 'text_input',
             'placeholder': 'Enter 8-digit code'
         }
+    
     elif 'book' in message_lower and 'appointment' in message_lower:
         session['state'] = 'waiting_name'
         session['patient_data'] = {}
@@ -812,6 +846,7 @@ def handle_greeting(message, session):
             'type': 'text_input',
             'placeholder': 'Enter your full name'
         }
+    
     else:
         return {
             'message': '🏥 Welcome to Medical Chatbot! 🏥\n\nI can help you with:\n• Check your existing booking details with unique code\n• Book a new doctor\'s appointment\n\nPlease select an option below:',
@@ -855,6 +890,7 @@ def handle_code_input(message, session):
             'message': details_text,
             'type': 'booking_details'
         }
+    
     else:
         return {
             'message': '❌ Code not found. Please check your code and try again.\n\nType "menu" to return to main menu.',
@@ -1035,12 +1071,14 @@ def handle_doctor_selection(message, session):
                 'type': 'date_selection',
                 'dates': dates
             }
+        
         else:
             return {
                 'message': '❌ Invalid selection. Please select a doctor from the options below:',
                 'type': 'doctor_selection',
                 'doctors': session.get('available_doctors', [])
             }
+            
     except ValueError:
         return {
             'message': '❌ Please select a doctor from the options below:',
@@ -1073,12 +1111,14 @@ def handle_date_selection(message, session):
                 'type': 'time_selection',
                 'time_slots': time_slots
             }
+        
         else:
             return {
                 'message': '❌ Invalid selection. Please select a date from the options below:',
                 'type': 'date_selection',
                 'dates': session.get('available_dates', [])
             }
+            
     except ValueError:
         return {
             'message': '❌ Please select a date from the options below:',
@@ -1125,17 +1165,20 @@ def handle_time_selection(message, session):
                     'type': 'booking_confirmed',
                     'unique_code': unique_code
                 }
+            
             else:
                 return {
                     'message': f"❌ Booking Failed\n\n{result}\n\nPlease try again or contact support.\n\nType 'menu' to return to main menu.",
                     'type': 'error'
                 }
+        
         else:
             return {
                 'message': '❌ Invalid selection. Please select a time slot from the options below:',
                 'type': 'time_selection',
                 'time_slots': session.get('available_time_slots', [])
             }
+            
     except ValueError:
         return {
             'message': '❌ Please select a time slot from the options below:',
@@ -1147,6 +1190,7 @@ def handle_booking_start(message, session):
     """Handle booking start"""
     session['state'] = 'waiting_name'
     session['patient_data'] = {}
+    
     return {
         'message': '👤 Great! Let\'s book your appointment. Please enter your full name:',
         'type': 'text_input',
