@@ -201,27 +201,8 @@ class MedicalChatBot:
             except:
                 return code
 
-    # Generate patient ID - PATID - PAT001, PAT002, etc.    
-    # def generate_pat_id(self): 
-    #     while True:
-    #         patient_id = 'PAT' + ''.join(random.choices(string.digits, k = 3))
-
-    #         if not self.mongo_client:
-    #             return patient_id
-            
-    #         try:
-    #             existing_patient = self.patients_collection.find_one({"patientId": patient_id})
-    #             if not existing_patient:
-    #                 return patient_id
-    #         except:
-    #             return patient_id
-
+    # Generate patient ID - PATID - PAT001, PAT002, etc.
     def generate_pat_id(self):
-        """Generate sequential patient ID like PAT001, PAT002, etc."""
-        if not self.mongo_client:
-            # Demo mode - return default
-            return "PAT001"
-        
         try:
             # Find the patient with the highest patient ID
             # Sort by patientId in descending order and get the first one
@@ -236,10 +217,11 @@ class MedicalChatBot:
             
             # Extract the numeric part from the last patient ID
             last_id = last_patient["patientId"]
-            # Remove 'PAT' prefix and convert to integer
+            
+            # Remove 'PAT' and convert to integer
             last_number = int(last_id.replace("PAT", ""))
             
-            # Increment and format with leading zeros (3 digits)
+            # next patient ID number
             next_number = last_number + 1
             patient_id = f"PAT{next_number:03d}"
             
