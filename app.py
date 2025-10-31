@@ -200,7 +200,57 @@ class MedicalChatBot:
                     return code
             except:
                 return code
-    
+
+    # Generate patient ID - PATID - PAT001, PAT002, etc.    
+    # def generate_pat_id(self): 
+    #     while True:
+    #         patient_id = 'PAT' + ''.join(random.choices(string.digits, k = 3))
+
+    #         if not self.mongo_client:
+    #             return patient_id
+            
+    #         try:
+    #             existing_patient = self.patients_collection.find_one({"patientId": patient_id})
+    #             if not existing_patient:
+    #                 return patient_id
+    #         except:
+    #             return patient_id
+
+    def generate_pat_id(self):
+        """Generate sequential patient ID like PAT001, PAT002, etc."""
+        if not self.mongo_client:
+            # Demo mode - return default
+            return "PAT001"
+        
+        try:
+            # Find the patient with the highest patient ID
+            # Sort by patientId in descending order and get the first one
+            last_patient = self.patients_collection.find_one(
+                {},
+                sort=[("patientId", -1)]
+            )
+            
+            if not last_patient or "patientId" not in last_patient:
+                # No patients exist yet, start with PAT001
+                return "PAT001"
+            
+            # Extract the numeric part from the last patient ID
+            last_id = last_patient["patientId"]
+            # Remove 'PAT' prefix and convert to integer
+            last_number = int(last_id.replace("PAT", ""))
+            
+            # Increment and format with leading zeros (3 digits)
+            next_number = last_number + 1
+            patient_id = f"PAT{next_number:03d}"
+            
+            return patient_id
+            
+        except Exception as e:
+            logger.error(f"Error generating patient ID: {e}")
+            # Fallback to PAT001 if there's an error
+            return "PAT001"
+
+
     def get_booking_details_by_code(self, unique_code):
         """Get complete booking details by unique code from patient collection"""
         if not self.mongo_client:
@@ -270,7 +320,7 @@ class MedicalChatBot:
             logger.error(f"Error fetching booking details: {e}")
             return None
     
-    def save_patient_to_db(self, patient_data, unique_code):
+    def save_patient_to_db(self, patient_data, unique_code, pat_id):
         """Save complete patient and appointment information to MongoDB patients collection"""
         if not self.mongo_client:
             # Demo mode
@@ -293,7 +343,8 @@ class MedicalChatBot:
                 "matchedSymptoms": patient_data.get('matched_symptoms', []),
                 "possibleDiseases": patient_data.get('possible_diseases', []),
                 "createdAt": datetime.now(),
-                "updatedAt": datetime.now()
+                "updatedAt": datetime.now(),
+                "patientId": pat_id
             }
             
             result = self.patients_collection.insert_one(patient_document)
@@ -332,6 +383,8 @@ class MedicalChatBot:
             
             # Generate unique code
             unique_code = self.generate_unique_code()
+
+            pat_id = self.generate_pat_id()
             
             # Prepare complete patient data with appointment details
             complete_patient_data = {
@@ -350,7 +403,7 @@ class MedicalChatBot:
             }
             
             # Save everything to patient collection
-            patient_id = self.save_patient_to_db(complete_patient_data, unique_code)
+            patient_id = self.save_patient_to_db(complete_patient_data, unique_code, pat_id)
             
             if not patient_id:
                 return False, "Failed to save booking information"
